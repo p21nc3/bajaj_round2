@@ -1,0 +1,17 @@
+{
+  "name": "node.js",
+  "version": "1.0.0",
+  "description": "Creating an REST API with GET and POST endpoint",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app.js"
+  },
+  "keywords": [
+    "REST",
+    "GET",
+    "POST",
+    "Bajaj."
+  ],
+  "author": "Prince Bhardwaj",
+  "license": "Apache-2.0"
+}
