@@ -3,67 +3,65 @@ const url = require('url');
 
 // Create an HTTP server
 const server = http.createServer((req, res) => {
-  // Parse the URL to determine the endpoint and HTTP method
-  const { pathname } = url.parse(req.url);
+  if (req.method === 'GET' && req.url === '/bfhl') {
+    // Handle GET request
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ operation_code: 1 }));
+  } else if (req.method === 'POST' && req.url === '/bfhl') {
+    // Handle POST request
+    let body = '';
 
-  if (req.method === 'GET' && pathname === '/api/operation_code') {
-    // Handle GET request for /api/operation_code
-    const operationCode = '12345';
-    res.setHeader('Content-Type', 'application/json');
-    res.statusCode = 200;
-    res.end(JSON.stringify({ operation_code: operationCode }));
-  } else if (req.method === 'POST' && pathname === '/api/user') {
-    // Handle POST request for /api/user
-    let requestBody = '';
-    req.on('data', (chunk) => {
-      requestBody += chunk;
+    req.on('data', (data) => {
+      body += data;
     });
 
     req.on('end', () => {
       try {
-        const requestData = JSON.parse(requestBody);
+        const requestData = JSON.parse(body);
 
-        // Extract data from the JSON request body
-        const {
-          status,
-          user_id,
-          college_email_id,
-          college_roll_number,
-          numbers,
-          alphabets,
-        } = requestData;
+        // Extract data from the request
+        const { data } = requestData;
 
-        // Calculate the highest alphabet in the input array of alphabets
-        const highestAlphabet = Math.max(...alphabets.map((char) => char.charCodeAt(0)));
+        // Construct user_id in the required format
+        const user_id = 'john_doe_17091999';
+        const email = 'john@xyz.com';
+        const roll_number = 'ABCD123';
 
-        // Create a response object
+        // Separate numbers and alphabets from the data array
+        const numbers = data.filter((item) => !isNaN(item));
+        const alphabets = data.filter((item) => isNaN(item));
+
+        // Find the highest alphabet in the array of alphabets
+        const highestAlphabet = alphabets.reduce((highest, current) => {
+          return current > highest ? current : highest;
+        });
+
+        // Prepare the response object
         const response = {
-          status,
+          is_success: true,
           user_id,
-          college_email_id,
-          college_roll_number,
+          email,
+          roll_number,
           numbers,
           alphabets,
-          highest_alphabet: String.fromCharCode(highestAlphabet), // Convert ASCII code back to character
+          highest_alphabet: [highestAlphabet],
         };
 
-        // Send the response as JSON
-        res.setHeader('Content-Type', 'application/json');
-        res.statusCode = 200;
+        res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(response));
       } catch (error) {
-        res.statusCode = 400;
-        res.end('Bad Request');
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Invalid JSON data' }));
       }
     });
   } else {
-    // Handle other routes or methods
-    res.statusCode = 404;
+    // Handle other requests
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('Not Found');
   }
 });
 
-// Define the port to listen on
+// Define the port for your API
 const port = process.env.PORT || 3000;
 
 // Start the server
